@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#EDE8DF">
+<title>数竞打卡 · CMC数学A类</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Noto+Sans+SC:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDE8DF;
+  --surface:#FDFAF5;
+  --surface2:#F3EDE3;
+  --ink:#1C1917;
+  --ink2:#57534E;
+  --ink3:#A8A29E;
+  --border:rgba(28,25,23,0.09);
+  --shadow:0 2px 20px rgba(0,0,0,0.07),0 1px 3px rgba(0,0,0,0.04);
+  --c1:#5B52A8;--c1b:#EEEDFB;--c1t:#3D3580;
+  --c2:#1F7A5C;--c2b:#DFF2EA;--c2t:#14573F;
+  --c3:#C47B28;--c3b:#FDF0DC;--c3t:#8F5910;
+  --c4:#B03025;--c4b:#FBEBE9;--c4t:#821E16;
+  --c5:#1F6FA8;--c5b:#DEEDF8;--c5t:#124E7A;
+  --done:#2D6A4F;--done-bg:#E5F4ED;
+  --geo:#8B2FC9;--geo-bg:#F3E8FF;--geo-t:#5B1A8A;
+  --r:18px;--r-sm:12px;
+  --tab-h:60px;
+  --safe-bot:env(safe-area-inset-bottom, 0px);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px;-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Noto Sans SC','PingFang SC','Helvetica Neue',sans-serif;
+  min-height:100vh;
+  padding-bottom:calc(var(--tab-h) + var(--safe-bot) + 12px);
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:contain;
+}
+
+/* ── TOP BAR ── */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(237,232,223,0.9);
+  backdrop-filter:blur(16px) saturate(1.5);
+  -webkit-backdrop-filter:blur(16px) saturate(1.5);
+  border-bottom:1px solid var(--border);
+  padding:14px 20px 12px;
+  padding-top:calc(14px + env(safe-area-inset-top, 0px));
+  display:flex;align-items:center;justify-content:space-between;
+}
+.topbar-title{
+  font-family:'Lora',serif;
+  font-size:17px;font-weight:600;letter-spacing:.02em;
+}
+.topbar-sub{
+  font-size:11px;color:var(--ink3);
+  font-family:'DM Mono',monospace;
+  text-align:right;
+}
+
+/* ── PAGES ── */
+.page{display:none;padding:16px 16px 0;max-width:560px;margin:0 auto}
+.page.active{display:block}
+
+/* ── BOTTOM TABS ── */
+.tabs{
+  position:fixed;bottom:0;left:0;right:0;z-index:50;
+  background:rgba(253,250,245,0.95);
+  backdrop-filter:blur(20px) saturate(1.5);
+  -webkit-backdrop-filter:blur(20px) saturate(1.5);
+  border-top:1px solid var(--border);
+  display:flex;
+  height:calc(var(--tab-h) + var(--safe-bot));
+  padding-bottom:var(--safe-bot);
+}
+.tab{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:3px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:opacity .15s;
+  padding:8px 4px;
+}
+.tab:active{opacity:.6}
+.tab-icon{font-size:22px;line-height:1;transition:transform .2s}
+.tab-label{font-size:10px;color:var(--ink3);letter-spacing:.02em;font-weight:400}
+.tab.active .tab-icon{transform:scale(1.1)}
+.tab.active .tab-label{color:var(--ink);font-weight:500}
+
+/* ── CARDS ── */
+.card{
+  background:var(--surface);
+  border-radius:var(--r);
+  box-shadow:var(--shadow);
+  border:1px solid var(--border);
+  padding:20px;
+  margin-bottom:14px;
+}
+.card-sm{
+  background:var(--surface);
+  border-radius:var(--r-sm);
+  box-shadow:var(--shadow);
+  border:1px solid var(--border);
+  padding:16px;
+  margin-bottom:12px;
+}
+
+/* ── HERO ── */
+.hero{
+  background:var(--surface);
+  border-radius:var(--r);
+  box-shadow:var(--shadow);
+  border:1px solid var(--border);
+  padding:22px 20px 20px;
+  margin-bottom:14px;
+  display:flex;align-items:center;gap:20px;
+}
+.ring-wrap{flex-shrink:0;position:relative}
+.ring-center{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.ring-num{font-family:'Lora',serif;font-size:38px;font-weight:600;line-height:1;color:var(--ink)}
+.ring-label{font-size:10px;color:var(--ink3);margin-top:1px;letter-spacing:.05em}
+.hero-info{flex:1;min-width:0}
+.phase-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 10px;border-radius:20px;
+  font-size:11px;font-weight:500;margin-bottom:8px;
+}
+.phase-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.hero-title{font-family:'Lora',serif;font-size:17px;font-weight:600;line-height:1.3;margin-bottom:4px}
+.hero-sub{font-size:12px;color:var(--ink2);line-height:1.5}
+.prog-wrap{margin-top:12px}
+.prog-bg{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;border-radius:2px;transition:width .7s ease}
+.prog-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--ink3);margin-top:4px;font-family:'DM Mono',monospace}
+
+/* ── GEO BANNER ── */
+.geo-banner{
+  background:var(--geo-bg);
+  border:1px solid rgba(139,47,201,.15);
+  border-radius:var(--r-sm);
+  padding:14px 16px;
+  margin-bottom:14px;
+  display:flex;align-items:flex-start;gap:12px;
+}
+.geo-icon{font-size:24px;flex-shrink:0;margin-top:1px}
+.geo-body{flex:1}
+.geo-title{font-size:13px;font-weight:500;color:var(--geo-t);margin-bottom:3px}
+.geo-desc{font-size:12px;color:var(--geo-t);opacity:.85;line-height:1.55}
+.geo-tag{
+  display:inline-block;margin-top:8px;
+  background:rgba(139,47,201,.12);color:var(--geo-t);
+  font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;
+}
+
+/* ── SECTION LABEL ── */
+.sec-label{
+  font-size:11px;font-weight:500;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink3);
+  margin-bottom:10px;padding-left:2px;
+}
+
+/* ── TASKS ── */
+.tasks-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.tasks-left{display:flex;align-items:center;gap:8px}
+.tasks-title{font-size:14px;font-weight:500}
+.tasks-count{
+  font-size:12px;padding:3px 9px;border-radius:8px;
+  background:var(--surface2);color:var(--ink2);
+  font-family:'DM Mono',monospace;
+}
+.task-item{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:13px 0;
+  border-bottom:1px solid var(--border);
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:opacity .15s;
+  user-select:none;
+}
+.task-item:last-child{border-bottom:none;padding-bottom:0}
+.task-item:first-child{padding-top:0}
+.task-item:active{opacity:.7}
+.task-item.done .task-text{color:var(--ink3);text-decoration:line-through;text-decoration-color:var(--ink3)}
+.task-cb{
+  width:24px;height:24px;flex-shrink:0;
+  border-radius:7px;border:1.5px solid var(--ink3);
+  display:flex;align-items:center;justify-content:center;
+  margin-top:0;transition:all .2s;
+}
+.task-item.done .task-cb{background:var(--done);border-color:var(--done)}
+.task-cb svg{opacity:0;transform:scale(.5);transition:all .2s}
+.task-item.done .task-cb svg{opacity:1;transform:scale(1)}
+.task-text{flex:1;font-size:14px;line-height:1.55;color:var(--ink);transition:color .2s}
+.task-time{
+  font-size:11px;color:var(--ink3);
+  background:var(--surface2);padding:2px 7px;border-radius:6px;
+  flex-shrink:0;font-family:'DM Mono',monospace;align-self:flex-start;
+  white-space:nowrap;
+}
+.done-msg{
+  display:none;text-align:center;padding:14px 0 4px;
+  font-size:13px;color:var(--done);font-weight:500;
+  animation:fadeUp .4s ease;
+}
+.done-msg.show{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat-card{
+  background:var(--surface);border-radius:var(--r-sm);
+  box-shadow:var(--shadow);border:1px solid var(--border);
+  padding:14px 12px;
+}
+.stat-n{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;line-height:1;margin-bottom:3px}
+.stat-l{font-size:10px;color:var(--ink3);line-height:1.4}
+
+/* ── HEATMAP ── */
+.hm-grid{display:flex;gap:3px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.hm-col{display:flex;flex-direction:column;gap:3px}
+.hm-wk{font-size:9px;color:var(--ink3);text-align:center;height:11px;line-height:11px;margin-bottom:2px;font-family:'DM Mono',monospace}
+.hm-cell{
+  width:12px;height:12px;border-radius:3px;flex-shrink:0;
+  transition:transform .1s;
+}
+.hm-legend{display:flex;align-items:center;gap:4px;margin-top:10px;font-size:10px;color:var(--ink3);justify-content:flex-end}
+
+/* ── PLAN ACCORDION ── */
+.plan-card{
+  background:var(--surface);border-radius:var(--r);
+  box-shadow:var(--shadow);border:1px solid var(--border);
+  overflow:hidden;margin-bottom:10px;
+}
+.plan-head{
+  display:flex;align-items:center;gap:10px;
+  padding:15px 18px;cursor:pointer;
+  transition:background .15s;user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.plan-head:active{background:var(--surface2)}
+.plan-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.plan-name{font-weight:500;font-size:13px;flex:1;line-height:1.3}
+.plan-dates{font-size:10px;color:var(--ink3);font-family:'DM Mono',monospace;white-space:nowrap}
+.plan-chev{font-size:11px;color:var(--ink3);transition:transform .25s;margin-left:2px}
+.plan-head.open .plan-chev{transform:rotate(180deg)}
+.plan-body{display:none;padding:0 18px 18px;border-top:1px solid var(--border)}
+.plan-body.open{display:block}
+.plan-desc{
+  font-size:13px;color:var(--ink2);
+  background:var(--surface2);border-radius:10px;
+  padding:11px 13px;margin:13px 0;line-height:1.7;
+}
+.plan-tl{font-size:11px;font-weight:500;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin:12px 0 7px}
+.plan-row{
+  display:flex;align-items:flex-start;gap:8px;
+  font-size:13px;color:var(--ink2);line-height:1.5;margin-bottom:8px;
+}
+.plan-bullet{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.plan-t{font-size:10px;color:var(--ink3);font-family:'DM Mono',monospace;margin-left:4px;white-space:nowrap}
+.plan-books{display:flex;flex-wrap:wrap;gap:5px;margin-top:11px}
+.book-tag{font-size:11px;padding:4px 9px;border-radius:7px;border:1px solid var(--border);color:var(--ink2);background:var(--surface2)}
+.plan-note{margin-top:10px;font-size:12px;color:var(--ink3);font-style:italic;line-height:1.6;padding-left:10px;border-left:2px solid var(--border)}
+.curr-badge{
+  font-size:10px;padding:2px 7px;border-radius:5px;font-weight:500;
+  margin-left:5px;vertical-align:middle;
+}
+
+/* ── EXAM STRATEGY ── */
+.s-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+.s-item{background:var(--surface2);border-radius:10px;padding:12px 13px}
+.s-head{font-size:12px;font-weight:500;margin-bottom:4px}
+.s-body{font-size:12px;color:var(--ink2);line-height:1.55}
+.s-geo{
+  margin-top:10px;
+  background:var(--geo-bg);border-radius:10px;
+  padding:12px 14px;border:1px solid rgba(139,47,201,.12);
+}
+.s-geo-h{font-size:13px;font-weight:500;color:var(--geo-t);margin-bottom:5px}
+.s-geo-b{font-size:12px;color:var(--geo-t);opacity:.9;line-height:1.6}
+.s-tip{
+  margin-top:10px;font-size:13px;color:var(--ink2);
+  background:var(--surface2);border-radius:10px;padding:12px 14px;line-height:1.7;
+}
+.s-tip b{color:var(--ink);font-weight:500}
+
+/* ── CHECKIN LOG ── */
+.log-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 0;border-bottom:1px solid var(--border);
+  font-size:13px;
+}
+.log-item:last-child{border-bottom:none}
+.log-date{color:var(--ink3);font-family:'DM Mono',monospace;font-size:11px;min-width:70px}
+.log-dots{display:flex;gap:4px}
+.log-dot{width:8px;height:8px;border-radius:2px}
+
+/* ── NOTE INPUT ── */
+.note-input{
+  width:100%;padding:12px 14px;
+  background:var(--surface2);border:none;border-radius:10px;
+  font-family:'Noto Sans SC',sans-serif;font-size:13px;
+  color:var(--ink);line-height:1.6;resize:none;
+  outline:none;
+  -webkit-appearance:none;
+}
+.note-input::placeholder{color:var(--ink3)}
+.note-input:focus{background:#EBF7F3;box-shadow:0 0 0 2px rgba(31,122,92,.18)}
+
+/* ── FINISH BANNER ── */
+.finish{
+  display:none;
+  background:var(--done-bg);border-radius:12px;
+  text-align:center;padding:10px;
+  color:var(--done);font-size:13px;font-weight:500;
+  margin-bottom:14px;animation:fadeUp .5s;
+}
+.finish.show{display:block}
+
+/* ── TOOLTIP ── */
+.tt{
+  position:fixed;z-index:100;pointer-events:none;
+  background:var(--ink);color:#fff;
+  font-size:11px;padding:5px 9px;border-radius:7px;
+  opacity:0;transition:opacity .15s;white-space:nowrap;
+}
+
+/* ── WEEK MOCK BADGE ── */
+.week-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  background:#FEF9EC;border:1px solid rgba(196,123,40,.25);
+  border-radius:8px;padding:4px 10px;
+  font-size:11px;color:var(--c3t);font-weight:500;
+  margin-top:8px;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title" style="font-family:'Lora',serif">数竞打卡</div>
+    <div style="font-size:11px;color:var(--ink3);margin-top:1px">全国大学生数学竞赛 · 数学A类</div>
+  </div>
+  <div class="topbar-sub" id="hdr-date"></div>
+</div>
+
+<!-- PAGE: TODAY -->
+<div class="page active" id="pg-today">
+
+  <!-- Hero countdown -->
+  <div class="hero">
+    <div class="ring-wrap">
+      <svg width="96" height="96" viewBox="0 0 96 96">
+        <circle cx="48" cy="48" r="40" fill="none" stroke="#E8E2D8" stroke-width="6"/>
+        <circle id="ring-c" cx="48" cy="48" r="40" fill="none"
+          stroke="#5B52A8" stroke-width="6" stroke-linecap="round"
+          stroke-dasharray="251.3" stroke-dashoffset="251.3"
+          transform="rotate(-90 48 48)"
+          style="transition:stroke-dashoffset 1s ease,stroke .4s"/>
+      </svg>
+      <div class="ring-center">
+        <div class="ring-num" id="ring-n">—</div>
+        <div class="ring-label">天后考试</div>
+      </div>
+    </div>
+    <div class="hero-info">
+      <div class="phase-badge" id="phase-badge"></div>
+      <div class="hero-title" id="hero-ttl"></div>
+      <div class="hero-sub" id="hero-sub"></div>
+      <div class="prog-wrap">
+        <div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0"></div></div>
+        <div class="prog-labels"><span id="prog-l"></span><span>共236天</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Geo reminder (always visible) -->
+  <div class="geo-banner">
+    <div class="geo-icon">📐</div>
+    <div class="geo-body">
+      <div class="geo-title">解析几何 · 每日必做 · 15分保底</div>
+      <div class="geo-desc">这是你和其他人拉开差距的起点。公式背到手软，计算零失误，考场稳拿这15分。</div>
+      <div class="geo-tag">今日打卡后记得完成解析几何</div>
+    </div>
+  </div>
+
+  <!-- Finish banner -->
+  <div class="finish" id="finish-banner">✓ 今日任务全部完成，明天继续加油！</div>
+
+  <!-- Tasks -->
+  <div class="sec-label">今日打卡</div>
+  <div class="card">
+    <div class="tasks-header">
+      <div class="tasks-left">
+        <span class="tasks-title" id="phase-label"></span>
+      </div>
+      <div class="tasks-count" id="tasks-count">0 / 4</div>
+    </div>
+    <div id="tasks-list"></div>
+    <div class="done-msg" id="done-msg">✓ 今日打卡完成，保持住！</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-n" id="stat-streak">0</div>
+      <div class="stat-l">连续打卡天数</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-n" id="stat-total">0</div>
+      <div class="stat-l">累计完成天数</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-n" id="stat-day">1</div>
+      <div class="stat-l">今日第 N 天</div>
+    </div>
+  </div>
+
+  <!-- Heatmap -->
+  <div class="card">
+    <div class="sec-label" style="margin-bottom:13px">近期打卡</div>
+    <div class="hm-grid" id="hm-grid"></div>
+    <div class="hm-legend">
+      <span>少</span>
+      <div style="width:11px;height:11px;border-radius:2px;background:#E8E2D8"></div>
+      <div style="width:11px;height:11px;border-radius:2px;background:#B8D9C8"></div>
+      <div style="width:11px;height:11px;border-radius:2px;background:#78C0A0"></div>
+      <div style="width:11px;height:11px;border-radius:2px;background:#2D6A4F"></div>
+      <span>多</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- PAGE: PLAN -->
+<div class="page" id="pg-plan">
+  <div style="padding-top:4px"></div>
+  <div class="sec-label">五阶段备考计划</div>
+  <div id="plan-acc"></div>
+</div>
+
+<!-- PAGE: STRATEGY -->
+<div class="page" id="pg-strat">
+  <div style="padding-top:4px"></div>
+  <div class="sec-label">考场策略</div>
+  <div class="card">
+    <div class="s-grid">
+      <div class="s-item">
+        <div class="s-head" style="color:var(--c1t)">填空 20分</div>
+        <div class="s-body">仔细审题，全力全对。不确定不写，宁缺毋错。</div>
+      </div>
+      <div class="s-item">
+        <div class="s-head" style="color:var(--c3t)">数学分析 20分</div>
+        <div class="s-body">第一问先做，第二问想想为何设了第一问。</div>
+      </div>
+      <div class="s-item">
+        <div class="s-head" style="color:var(--c4t)">高等代数 15分</div>
+        <div class="s-body">第一问可做，没思路别死磕，去拿其他题的分。</div>
+      </div>
+      <div class="s-item">
+        <div class="s-head" style="color:var(--c2t)">综合难题</div>
+        <div class="s-body">写出已知条件整理 + 相关定理，有部分分。</div>
+      </div>
+    </div>
+    <div class="s-geo">
+      <div class="s-geo-h">📐 解析几何 15分 · 这是差距所在</div>
+      <div class="s-geo-b">平时把教材所有公式背到手软，计算零失误。考场上见到解析几何题，直接拿走这15分，别让其他人比你多这一项。每天20-30分钟保温，考前连续默写，这是非数学A类转跨越到国一的关键分水岭。</div>
+    </div>
+    <div class="s-tip">
+      <b>骗分法：</b>不会做的题写已知条件整理 → 写相关正确定理 → 展示推导方向。<b>绝不写错误内容</b>，每道题都动笔。<br><br>
+      <b>核心原则：</b>会做的题拿满分 = 一个不错的奖项。保持平静，慢慢想，慢慢写。
+    </div>
+  </div>
+
+  <div class="sec-label" style="margin-top:4px">备考核心逻辑</div>
+  <div class="card">
+    <div style="font-size:13px;color:var(--ink2);line-height:1.75">
+      <div style="margin-bottom:12px">
+        <span style="font-weight:500;color:var(--ink)">第一阶段（现在到暑假）：</span>
+        跟好自学节奏，同步推进裴礼文和谢启鸿，不超前不贪快。解析几何每天20分钟保温够了。课程跟好就行，不要为了刷题牺牲课内。
+      </div>
+      <div style="margin-bottom:12px">
+        <span style="font-weight:500;color:var(--ink)">第二阶段（整个暑假）：</span>
+        这是236天里最值钱的时间。没课没考试，每天4–5小时完全可以。裴礼文和谢启鸿全书刷完，朱尧辰和真题同步开始。暑假两个月决定能不能冲国一。
+      </div>
+      <div>
+        <span style="font-weight:500;color:var(--ink)">第三阶段（开学到考试）：</span>
+        时间压缩了，但不能断。谢惠民难题 + 后几届真题 + 每周一套模拟，保持手感，不引入新内容。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: NOTE -->
+<div class="page" id="pg-note">
+  <div style="padding-top:4px"></div>
+  <div class="sec-label">今日笔记</div>
+  <div class="card">
+    <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:12px" id="note-date-label"></div>
+    <textarea class="note-input" id="note-input" rows="6" placeholder="今天学了什么，卡在哪一步，有什么新发现…"></textarea>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+      <div style="font-size:11px;color:var(--ink3)" id="note-saved-hint"></div>
+      <button onclick="saveNote()" style="background:var(--done);color:#fff;border:none;padding:9px 18px;border-radius:10px;font-size:13px;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent">保存</button>
+    </div>
+  </div>
+
+  <div class="sec-label">近期记录</div>
+  <div class="card">
+    <div id="log-list"></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('today',this)">
+    <div class="tab-icon">◎</div>
+    <div class="tab-label">今日</div>
+  </div>
+  <div class="tab" onclick="switchTab('plan',this)">
+    <div class="tab-icon">≡</div>
+    <div class="tab-label">计划</div>
+  </div>
+  <div class="tab" onclick="switchTab('strat',this)">
+    <div class="tab-icon">⊞</div>
+    <div class="tab-label">策略</div>
+  </div>
+  <div class="tab" onclick="switchTab('note',this)">
+    <div class="tab-icon">✎</div>
+    <div class="tab-label">笔记</div>
+  </div>
+</div>
+
+<div class="tt" id="tt"></div>
+
+<script>
+const START = new Date('2026-03-23T00:00:00');
+const EXAM  = new Date('2026-11-14T00:00:00');
+const TOTAL = 236;
+
+const PHASES = [
+  {
+    id:0, tag:'阶段一', name:'热身期',
+    dates:'3月23日 – 5月21日', days:'Day 1–60',
+    dot:'#5B52A8', bg:'#EEEDFB', dark:'#3D3580',
+    desc:'同步推进裴礼文和谢启鸿，不超前，不贪快。建立严谨的解题书写习惯，感受真题题型结构。解析几何每天20分钟保温，不需要投入更多。',
+    tasks:[
+      {t:'解析几何：精读一节，整理公式到笔记', d:'20min'},
+      {t:'裴礼文 第1–3章：今日例题，写完整推导过程', d:'40min'},
+      {t:'谢启鸿 第1–2章：今日习题，标注定理适用条件', d:'30min'},
+      {t:'浏览一套历届真题结构（不求解，感受题型）', d:'15min'},
+    ],
+    books:['裴礼文《数学分析典型问题与方法》','谢启鸿《高等代数》','大一解析几何教材'],
+    note:'竞赛题的核心是数分高代基础方法的组合与综合运用，不是单独的竞赛技巧。用好教材即可。',
+  },
+  {
+    id:1, tag:'阶段二', name:'基础期',
+    dates:'5月22日 – 7月31日', days:'Day 61–130',
+    dot:'#1F7A5C', bg:'#DFF2EA', dark:'#14573F',
+    desc:'系统完成裴礼文和谢启鸿全书主要章节，同步保温解析几何。注意：期末前两周绩点优先，提前把内容推进到5月，给期末留缓冲。',
+    tasks:[
+      {t:'裴礼文 第4–7章：每节10–15题，写完整推导', d:'60min'},
+      {t:'谢启鸿 第3–5章：重点写证明，标注定理范围', d:'45min'},
+      {t:'解析几何保温：复习一个板块公式', d:'20min'},
+      {t:'整理今日错题，写下"卡在哪一步"', d:'15min'},
+    ],
+    books:['裴礼文（4–7章）','谢启鸿（3–5章）'],
+    note:'5–6月是学期末。绩点和竞赛不能顾此失彼，合理规划，期末后立刻恢复节奏。',
+  },
+  {
+    id:2, tag:'阶段三', name:'暑假冲刺',
+    dates:'8月1日 – 9月29日', days:'Day 131–190',
+    dot:'#C47B28', bg:'#FDF0DC', dark:'#8F5910',
+    desc:'全年最关键的60天。没有课程束缚，每天4–5小时完全可以。把裴礼文和谢启鸿全书刷完，朱尧辰竞赛题选和历届真题同步开始。这两个月决定能否冲国一。',
+    tasks:[
+      {t:'裴礼文收尾 / 谢惠民难题精做（上午精力最佳）', d:'90min'},
+      {t:'谢启鸿收尾 / 朱尧辰竞赛题选（下午系统刷）', d:'90min'},
+      {t:'历届真题（第1–10届）：计时完成今日题目', d:'60min'},
+      {t:'整理错题本："卡点 → 正确思路"链条', d:'30min'},
+    ],
+    books:['谢惠民《数学分析习题课讲义》','朱尧辰《大学生数学竞赛题选》','历届真题 1–10届'],
+    note:'暑假是拉开差距的关键窗口。每天要保证时间，状态好时多做，状态差时至少做完基本量。解析几何不停，每天默写一次。',
+    weekMock:false,
+  },
+  {
+    id:3, tag:'阶段四', name:'真题集训',
+    dates:'9月30日 – 10月29日', days:'Day 191–220',
+    dot:'#B03025', bg:'#FBEBE9', dark:'#821E16',
+    desc:'开学后时间压缩，保持每天1.5–2小时。谢惠民难题精做 + 历届真题刷完 + 每周一套模拟，保持手感。不引入新内容。',
+    tasks:[
+      {t:'谢惠民难题：选2–3题精做，分析题目特征', d:'60min'},
+      {t:'历届真题（第11–17届）：今日套题进度', d:'90min'},
+      {t:'错题本：新增今日错题 + 复习3道旧题', d:'30min'},
+      {t:'解析几何公式每日默写（保底15分）', d:'15min'},
+    ],
+    books:['历届真题 11–17届','谢惠民（难题选做）','错题本'],
+    note:'这个阶段结束，所有常见题型都应该有感觉了。重点是形成"看到条件→联想解法"的自动反应。每周模拟一套，模拟考场节奏。',
+    weekMock:true,
+  },
+  {
+    id:4, tag:'阶段五', name:'收尾冲刺',
+    dates:'10月30日 – 11月14日', days:'Day 221–236',
+    dot:'#1F6FA8', bg:'#DEEDF8', dark:'#124E7A',
+    desc:'不引入任何新内容。背记解析几何公式直到手软，翻阅错题本，调整状态。考前三天轻度复习，放平心态，保证睡眠。',
+    tasks:[
+      {t:'解析几何所有公式轮流默写（必须全背会）', d:'30min'},
+      {t:'错题本：翻阅5–10道关键典型题', d:'30min'},
+      {t:'限时完成1道大题，规范书写练手感', d:'45min'},
+      {t:'早睡早起，保持规律作息，不引入新内容', d:'—'},
+    ],
+    books:['解析几何公式笔记','错题本'],
+    note:'考场上：平平静静，慢慢想，慢慢写。会做的拿满分，解析几何直接全拿，这就是一个好成绩。',
+  },
+];
+
+const HMC = ['#E8E2D8','#B8D9C8','#78C0A0','#4A9E7E','#2D6A4F'];
+
+function todayStr(){
+  return new Date().toISOString().slice(0,10);
+}
+function toDate(s){return new Date(s+'T00:00:00')}
+function addDays(s,n){
+  const d=toDate(s);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);
+}
+function dayNum(s){return Math.floor((toDate(s)-START)/86400000)+1}
+function daysLeft(s){return Math.ceil((EXAM-toDate(s))/86400000)}
+function phaseIdx(d){
+  if(d<=60)return 0;if(d<=130)return 1;if(d<=190)return 2;if(d<=220)return 3;return 4;
+}
+function fmtDate(s){
+  return toDate(s).toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'short'});
+}
+
+let state=function(){
+  try{const r=localStorage.getItem('cmc_v3');if(r)return JSON.parse(r);}catch(e){}
+  return{checkins:{},notes:{}};
+}();
+function save(){try{localStorage.setItem('cmc_v3',JSON.stringify(state));}catch(e){}}
+
+function getCk(s){return state.checkins[s]||[false,false,false,false]}
+function setTask(s,i,v){
+  if(!state.checkins[s])state.checkins[s]=[false,false,false,false];
+  state.checkins[s][i]=v;save();
+}
+function isDone(s){return getCk(s).every(Boolean)}
+function totalDone(){return Object.keys(state.checkins).filter(isDone).length}
+function calcStreak(){
+  let n=0,d=todayStr();
+  while(true){
+    if(!isDone(d)){if(d===todayStr()){d=addDays(d,-1);continue;}break;}
+    n++;d=addDays(d,-1);
+  }
+  return n;
+}
+
+function switchTab(name, el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('pg-'+name).classList.add('active');
+  el.classList.add('active');
+  if(name==='today') renderToday();
+  if(name==='plan') renderPlan();
+  if(name==='note') renderNote();
+}
+
+function renderHeader(){
+  document.getElementById('hdr-date').textContent = fmtDate(todayStr());
+}
+
+function renderHero(){
+  const td=todayStr();
+  const dn=dayNum(td);
+  const dl=daysLeft(td);
+  const pct=Math.max(0,Math.min(100,(TOTAL-dl)/TOTAL*100));
+  const pidx=Math.max(0,Math.min(4,phaseIdx(Math.max(1,dn))));
+  const ph=PHASES[pidx];
+
+  const circ=2*Math.PI*40;
+  const off=circ*(1-pct/100);
+  const rc=document.getElementById('ring-c');
+  rc.setAttribute('stroke-dasharray',circ.toFixed(1));
+  setTimeout(()=>{
+    rc.setAttribute('stroke-dashoffset',off.toFixed(1));
+    rc.style.stroke=ph.dot;
+  },120);
+  document.getElementById('ring-n').textContent=Math.max(0,dl);
+
+  const pb=document.getElementById('phase-badge');
+  pb.style.background=ph.bg;pb.style.color=ph.dark;
+  pb.innerHTML=`<span class="phase-dot" style="background:${ph.dot}"></span>${ph.tag} · ${ph.name}`;
+
+  document.getElementById('hero-ttl').textContent=
+    dn<1?'备考即将开始':dn>TOTAL?'初赛已结束！':ph.desc.slice(0,18)+'…';
+  document.getElementById('hero-sub').textContent=
+    dn<1?`距开始还有${Math.abs(dn)+1}天`:dn>TOTAL?'祝一切顺利':`第${dn}天 · ${ph.dates}`;
+
+  const pf=document.getElementById('prog-fill');
+  pf.style.width=pct.toFixed(1)+'%';pf.style.background=ph.dot;
+  document.getElementById('prog-l').textContent=`第${Math.max(1,Math.min(TOTAL,dn))}天`;
+}
+
+function renderToday(){
+  renderHeader();renderHero();
+  const td=todayStr();
+  const dn=dayNum(td);
+  const pidx=Math.max(0,Math.min(4,phaseIdx(Math.max(1,dn))));
+  const ph=PHASES[pidx];
+  const ck=getCk(td);
+  const done=ck.filter(Boolean).length;
+
+  document.getElementById('phase-label').textContent=ph.tag+' · '+ph.name;
+  document.getElementById('tasks-count').textContent=`${done} / ${ph.tasks.length}`;
+
+  const list=document.getElementById('tasks-list');
+  list.innerHTML='';
+  ph.tasks.forEach((task,i)=>{
+    const d=ck[i];
+    const div=document.createElement('div');
+    div.className='task-item'+(d?' done':'');
+    div.innerHTML=`
+      <div class="task-cb">
+        <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
+          <path d="M1 4L4.5 7.5L11 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="task-text">${task.t}</div>
+      <div class="task-time">${task.d}</div>`;
+    div.addEventListener('click',()=>{setTask(td,i,!ck[i]);renderToday();});
+    list.appendChild(div);
+  });
+
+  if(ph.weekMock){
+    const wb=document.createElement('div');
+    wb.innerHTML='<div class="week-badge">📋 每周一套模拟 · 本周完成了吗？</div>';
+    list.appendChild(wb);
+  }
+
+  const all=done===ph.tasks.length;
+  document.getElementById('done-msg').className='done-msg'+(all?' show':'');
+  document.getElementById('finish-banner').className='finish'+(all?' show':'');
+
+  document.getElementById('stat-streak').textContent=calcStreak();
+  document.getElementById('stat-total').textContent=totalDone();
+  document.getElementById('stat-day').textContent=Math.max(1,Math.min(TOTAL,dn));
+
+  renderHeatmap();
+}
+
+function renderHeatmap(){
+  const grid=document.getElementById('hm-grid');
+  grid.innerHTML='';
+  const W=12;
+  const todayD=toDate(todayStr());
+  const dow=(todayD.getDay()+6)%7;
+  let startD=new Date(todayD);
+  startD.setDate(startD.getDate()-dow-(W-1)*7);
+
+  for(let w=0;w<W;w++){
+    const col=document.createElement('div');col.className='hm-col';
+    const wl=document.createElement('div');wl.className='hm-wk';
+    const wd=new Date(startD);wd.setDate(wd.getDate()+w*7);
+    wl.textContent=(wd.getMonth()+1)+'/'+(wd.getDate());
+    col.appendChild(wl);
+    for(let d=0;d<7;d++){
+      const cd=new Date(startD);cd.setDate(cd.getDate()+w*7+d);
+      const cs=cd.toISOString().slice(0,10);
+      const cell=document.createElement('div');cell.className='hm-cell';
+      const fut=cd>todayD,bef=cd<START;
+      if(fut||bef){cell.style.background='#E8E2D8';cell.style.opacity='.3';}
+      else{
+        const cnt=getCk(cs).filter(Boolean).length;
+        cell.style.background=HMC[cnt];
+        if(cs===todayStr()){cell.style.outline='2px solid #78716C';cell.style.outlineOffset='1px';}
+      }
+      col.appendChild(cell);
+    }
+    grid.appendChild(col);
+  }
+}
+
+function renderPlan(){
+  const acc=document.getElementById('plan-acc');
+  if(acc.children.length>0)return;
+  const dn=dayNum(todayStr());
+  const curr=Math.max(0,Math.min(4,phaseIdx(Math.max(1,dn))));
+
+  PHASES.forEach((p,i)=>{
+    const isCurr=i===curr;
+    const card=document.createElement('div');card.className='plan-card';
+    card.innerHTML=`
+      <div class="plan-head${isCurr?' open':''}" onclick="togglePlan(this)">
+        <div class="plan-dot" style="background:${p.dot}"></div>
+        <div class="plan-name">
+          ${p.tag} · ${p.name}
+          ${isCurr?`<span class="curr-badge" style="background:${p.bg};color:${p.dark}">当前</span>`:''}
+        </div>
+        <div class="plan-dates">${p.dates}</div>
+        <span class="plan-chev">▾</span>
+      </div>
+      <div class="plan-body${isCurr?' open':''}">
+        <div class="plan-desc">${p.desc}</div>
+        <div class="plan-tl">每日任务</div>
+        ${p.tasks.map(t=>`
+          <div class="plan-row">
+            <span class="plan-bullet" style="background:${p.dot}"></span>
+            <span>${t.t} <span class="plan-t">${t.d}</span></span>
+          </div>`).join('')}
+        ${p.weekMock?'<div class="week-badge" style="margin-top:6px">📋 每周一套完整模拟题（周末计时完成）</div>':''}
+        <div class="plan-tl">参考书目</div>
+        <div class="plan-books">${p.books.map(b=>`<span class="book-tag">${b}</span>`).join('')}</div>
+        <div class="plan-note">${p.note}</div>
+      </div>`;
+    acc.appendChild(card);
+  });
+}
+
+function togglePlan(head){
+  const body=head.nextElementSibling;
+  const open=body.classList.toggle('open');
+  head.classList.toggle('open',open);
+}
+
+function renderNote(){
+  const td=todayStr();
+  document.getElementById('note-date-label').textContent=fmtDate(td);
+  document.getElementById('note-input').value=state.notes[td]||'';
+  document.getElementById('note-saved-hint').textContent='';
+
+  const log=document.getElementById('log-list');
+  const entries=Object.entries(state.notes).filter(([k,v])=>v).sort(([a],[b])=>b.localeCompare(a)).slice(0,10);
+  if(!entries.length){log.innerHTML='<div style="font-size:12px;color:var(--ink3)">暂无笔记记录，今天开始写吧。</div>';return;}
+  log.innerHTML=entries.map(([d,n])=>{
+    const ck=getCk(d);
+    const dots=ck.map(v=>`<div class="log-dot" style="background:${v?'#2D6A4F':'#E8E2D8'}"></div>`).join('');
+    return `<div class="log-item">
+      <div class="log-date">${d.slice(5)}</div>
+      <div class="log-dots">${dots}</div>
+      <div style="flex:1;font-size:12px;color:var(--ink2);overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${n}</div>
+    </div>`;
+  }).join('');
+}
+
+function saveNote(){
+  const td=todayStr();
+  state.notes[td]=document.getElementById('note-input').value;
+  save();
+  document.getElementById('note-saved-hint').textContent='已保存 ✓';
+  setTimeout(()=>{document.getElementById('note-saved-hint').textContent='';},2000);
+}
+
+// Boot
+renderHeader();renderHero();renderToday();
+document.getElementById('note-date-label')&&(document.getElementById('note-date-label').textContent=fmtDate(todayStr()));
+setInterval(()=>{
+  const n=new Date();if(n.getHours()===0&&n.getMinutes()===0){renderToday();}
+},60000);
+</script>
+</body>
+</html>
